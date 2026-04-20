@@ -1,0 +1,14 @@
+# ---------- Android ----------
+**/build/
+**/.gradle/
+**/local.properties
+**/.idea/
+**/*.iml
+**/captures/
+**/.cxx/
+**/.externalNativeBuild/
+
+# ---------- OS / Editor ----------
+.DS_Store
+Thumbs.db
+*.log
