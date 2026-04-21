@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
     <style name="Theme.BonsaiApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/green_primary</item>
+        <item name="colorPrimary">@color/green_800</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/green_100</item>
+        <item name="colorOnPrimaryContainer">@color/green_900</item>
+
+        <item name="colorSecondary">@color/brown_700</item>
+        <item name="colorOnSecondary">@color/white</item>
+
+        <item name="colorSurface">@color/surface_card</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+
+        <item name="android:colorBackground">@color/bg_app</item>
+        <item name="android:windowBackground">@color/bg_app</item>
+        <item name="android:statusBarColor">@color/green_900</item>
     </style>
+
 </resources>

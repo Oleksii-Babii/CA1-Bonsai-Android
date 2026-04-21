@@ -1,6 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Deep forest green palette -->
+    <color name="green_50">#EEF5EB</color>
+    <color name="green_100">#D0E8CA</color>
+    <color name="green_200">#A8CC9F</color>
+    <color name="green_300">#82B079</color>
+    <color name="green_400">#617D58</color>
+    <color name="green_500">#527049</color>
+    <color name="green_600">#456040</color>
+    <color name="green_700">#3A5C34</color>
+    <color name="green_800">#2C4829</color>
+    <color name="green_900">#1A2E17</color>
+
+    <!-- Warm earth tones -->
+    <color name="brown_300">#C4A882</color>
+    <color name="brown_500">#8B7355</color>
+    <color name="brown_700">#6B5240</color>
+    <color name="cream">#F2EDE4</color>
+
+    <!-- Surfaces -->
+    <color name="bg_app">#F2EDE4</color>
+    <color name="surface_card">#FFFFFF</color>
+
+    <!-- Text -->
+    <color name="text_primary">#1A2016</color>
+    <color name="text_secondary">#5A6854</color>
+
+    <color name="green_primary">#2C4829</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
-    <color name="green_primary">#2C4829</color>
 </resources>
