@@ -5,4 +5,7 @@
     <string name="btn_my_collection">My Collection</string>
     <string name="label_welcome">Welcome back</string>
     <string name="label_home_subtitle">Cultivate patience. Grow beauty.</string>
+    <string name="label_species">Species:</string>
+    <string name="empty_no_species">No species available.</string>
+    <string name="error_loading">Failed to load data. Check your connection.</string>
 </resources>
