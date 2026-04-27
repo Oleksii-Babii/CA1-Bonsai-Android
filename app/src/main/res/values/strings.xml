@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Bonsai Collection</string>
+    <string name="btn_browse_species">Browse Species</string>
+    <string name="btn_my_collection">My Collection</string>
+    <string name="label_welcome">Welcome back</string>
+    <string name="label_home_subtitle">Cultivate patience. Grow beauty.</string>
 </resources>
