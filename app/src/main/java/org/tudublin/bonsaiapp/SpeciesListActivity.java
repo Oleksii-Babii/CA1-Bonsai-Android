@@ -1,5 +1,6 @@
 package org.tudublin.bonsaiapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -40,7 +41,9 @@ public class SpeciesListActivity extends AppCompatActivity {
         emptyView   = findViewById(R.id.emptyView);
 
         adapter = new SpeciesAdapter(species -> {
-            // detail screen lands later
+            Intent intent = new Intent(SpeciesListActivity.this, SpeciesDetailActivity.class);
+            intent.putExtra(SpeciesDetailActivity.EXTRA_SPECIES_ID, species.getId());
+            startActivity(intent);
         });
         recycler.setLayoutManager(new LinearLayoutManager(this));
         recycler.setHasFixedSize(true);

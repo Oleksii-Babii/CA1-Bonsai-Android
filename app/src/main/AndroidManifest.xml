@@ -24,6 +24,12 @@
             android:exported="false"
             android:parentActivityName=".MainActivity" />
 
+        <activity
+            android:name=".SpeciesDetailActivity"
+            android:exported="false"
+            android:label="@string/label_species_detail"
+            android:parentActivityName=".SpeciesListActivity" />
+
     </application>
 
 </manifest>

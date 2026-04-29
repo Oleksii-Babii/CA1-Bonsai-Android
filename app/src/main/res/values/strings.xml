@@ -6,6 +6,9 @@
     <string name="label_welcome">Welcome back</string>
     <string name="label_home_subtitle">Cultivate patience. Grow beauty.</string>
     <string name="label_species">Species:</string>
+    <string name="label_species_detail">Species Detail</string>
+    <string name="label_origin">Origin:</string>
     <string name="empty_no_species">No species available.</string>
     <string name="error_loading">Failed to load data. Check your connection.</string>
+    <string name="cd_image">Bonsai image</string>
 </resources>
