@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.tudublin.bonsaiapp.adapter.SpeciesAdapter;
 import org.tudublin.bonsaiapp.api.BonsaiApiService;
 import org.tudublin.bonsaiapp.api.RetrofitClient;
 import org.tudublin.bonsaiapp.model.Species;
@@ -25,7 +26,7 @@ public class SpeciesListActivity extends AppCompatActivity {
 
     private static final String TAG = "BonsaiApp";
 
-    private RecyclerView recycler;
+    private SpeciesAdapter adapter;
     private ProgressBar progressBar;
     private TextView emptyView;
 
@@ -34,11 +35,16 @@ public class SpeciesListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_species_list);
 
-        recycler    = findViewById(R.id.recyclerSpecies);
+        RecyclerView recycler = findViewById(R.id.recyclerSpecies);
         progressBar = findViewById(R.id.progressBar);
         emptyView   = findViewById(R.id.emptyView);
 
+        adapter = new SpeciesAdapter(species -> {
+            // detail screen lands later
+        });
         recycler.setLayoutManager(new LinearLayoutManager(this));
+        recycler.setHasFixedSize(true);
+        recycler.setAdapter(adapter);
 
         loadSpecies();
     }
@@ -53,8 +59,8 @@ public class SpeciesListActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Species> list = response.body();
                     emptyView.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
+                    adapter.updateData(list);
                     Log.d(TAG, "Loaded " + list.size() + " species");
-                    // adapter wiring will follow in a separate change
                 }
             }
 
