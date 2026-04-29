@@ -23,8 +23,7 @@ public class SpeciesDetailActivity extends AppCompatActivity {
     public static final String EXTRA_SPECIES_ID = "org.tudublin.bonsaiapp.SPECIES_ID";
     private static final String TAG = "BonsaiApp";
 
-    private TextView textName;
-    private TextView textOrigin;
+    private TextView textName, textOrigin, textDifficulty, textDescription;
     private ImageView imageSpecies;
     private ProgressBar progressBar;
 
@@ -33,10 +32,12 @@ public class SpeciesDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_species_detail);
 
-        textName     = findViewById(R.id.textName);
-        textOrigin   = findViewById(R.id.textOrigin);
-        imageSpecies = findViewById(R.id.imageSpecies);
-        progressBar  = findViewById(R.id.progressBar);
+        textName        = findViewById(R.id.textName);
+        textOrigin      = findViewById(R.id.textOrigin);
+        textDifficulty  = findViewById(R.id.textDifficulty);
+        textDescription = findViewById(R.id.textDescription);
+        imageSpecies    = findViewById(R.id.imageSpecies);
+        progressBar     = findViewById(R.id.progressBar);
 
         int id = getIntent().getIntExtra(EXTRA_SPECIES_ID, -1);
         if (id == -1) { finish(); return; }
@@ -54,6 +55,8 @@ public class SpeciesDetailActivity extends AppCompatActivity {
                     Species s = response.body();
                     textName.setText(s.getName());
                     textOrigin.setText(getString(R.string.label_origin) + " " + s.getOriginCountry());
+                    textDifficulty.setText(s.getDifficultyLevel());
+                    textDescription.setText(s.getDescription());
                     Log.d(TAG, "Loaded species detail: " + s.getName());
                 }
             }

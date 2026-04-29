@@ -46,6 +46,7 @@ public class SpeciesAdapter extends RecyclerView.Adapter<SpeciesAdapter.ViewHold
         Species species = items.get(position);
         holder.textName.setText(species.getName());
         holder.textOrigin.setText(species.getOriginCountry());
+        holder.textDifficulty.setText(species.getDifficultyLevel());
         holder.itemView.setOnClickListener(v -> listener.onItemClick(species));
     }
 
@@ -55,13 +56,15 @@ public class SpeciesAdapter extends RecyclerView.Adapter<SpeciesAdapter.ViewHold
     static class ViewHolder extends RecyclerView.ViewHolder {
         final TextView textName;
         final TextView textOrigin;
+        final TextView textDifficulty;
         final ImageView imageSpecies;
 
         ViewHolder(View view) {
             super(view);
-            textName     = view.findViewById(R.id.textSpeciesName);
-            textOrigin   = view.findViewById(R.id.textSpeciesOrigin);
-            imageSpecies = view.findViewById(R.id.imageSpecies);
+            textName       = view.findViewById(R.id.textSpeciesName);
+            textOrigin     = view.findViewById(R.id.textSpeciesOrigin);
+            textDifficulty = view.findViewById(R.id.textSpeciesDifficulty);
+            imageSpecies   = view.findViewById(R.id.imageSpecies);
         }
     }
 }

@@ -40,5 +40,23 @@
             android:layout_marginTop="8dp"
             android:textColor="@color/text_secondary"
             android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/textDifficulty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/green_700"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:lineSpacingExtra="3dp" />
     </LinearLayout>
 </ScrollView>
