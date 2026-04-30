@@ -1,6 +1,7 @@
 package org.tudublin.bonsaiapp;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -9,6 +10,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import org.tudublin.bonsaiapp.api.BonsaiApiService;
 import org.tudublin.bonsaiapp.api.RetrofitClient;
@@ -57,6 +61,13 @@ public class SpeciesDetailActivity extends AppCompatActivity {
                     textOrigin.setText(getString(R.string.label_origin) + " " + s.getOriginCountry());
                     textDifficulty.setText(s.getDifficultyLevel());
                     textDescription.setText(s.getDescription());
+                    if (!TextUtils.isEmpty(s.getImageUrl())) {
+                        Glide.with(SpeciesDetailActivity.this)
+                                .load(s.getImageUrl())
+                                .placeholder(R.drawable.ic_tree_placeholder)
+                                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                                .into(imageSpecies);
+                    }
                     Log.d(TAG, "Loaded species detail: " + s.getName());
                 }
             }
