@@ -5,6 +5,7 @@
     <string name="btn_my_collection">My Collection</string>
     <string name="label_welcome">Welcome back</string>
     <string name="label_home_subtitle">Cultivate patience. Grow beauty.</string>
+    <string name="label_featured_species">Featured Species</string>
     <string name="label_species">Species:</string>
     <string name="label_species_detail">Species Detail</string>
     <string name="label_origin">Origin:</string>
