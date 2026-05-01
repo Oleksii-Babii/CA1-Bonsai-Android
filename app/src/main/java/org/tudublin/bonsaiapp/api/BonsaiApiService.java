@@ -19,4 +19,7 @@ public interface BonsaiApiService {
 
     @GET("/api/trees")
     Call<List<Tree>> getAllTrees();
+
+    @GET("/api/trees/{id}")
+    Call<Tree> getTree(@Path("id") int id);
 }

@@ -25,6 +25,9 @@
         <activity android:name=".TreeListActivity" android:exported="false"
             android:label="@string/label_trees"
             android:parentActivityName=".MainActivity" />
+        <activity android:name=".TreeDetailActivity" android:exported="false"
+            android:label="@string/label_tree_detail"
+            android:parentActivityName=".TreeListActivity" />
     </application>
 
 </manifest>

@@ -1,5 +1,6 @@
 package org.tudublin.bonsaiapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -39,7 +40,9 @@ public class TreeListActivity extends AppCompatActivity {
         emptyView   = findViewById(R.id.emptyView);
 
         adapter = new TreeAdapter(t -> {
-            // detail screen lands later
+            Intent i = new Intent(TreeListActivity.this, TreeDetailActivity.class);
+            i.putExtra(TreeDetailActivity.EXTRA_TREE_ID, t.getId());
+            startActivity(i);
         });
         recycler.setLayoutManager(new LinearLayoutManager(this));
         recycler.setHasFixedSize(true);
