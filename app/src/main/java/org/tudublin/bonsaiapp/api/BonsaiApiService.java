@@ -6,7 +6,9 @@ import org.tudublin.bonsaiapp.model.Tree;
 import java.util.List;
 
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Path;
 
 public interface BonsaiApiService {
@@ -22,4 +24,7 @@ public interface BonsaiApiService {
 
     @GET("/api/trees/{id}")
     Call<Tree> getTree(@Path("id") int id);
+
+    @POST("/api/trees")
+    Call<Tree> createTree(@Body Tree tree);
 }

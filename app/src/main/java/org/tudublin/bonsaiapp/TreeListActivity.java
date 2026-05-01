@@ -12,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import org.tudublin.bonsaiapp.adapter.TreeAdapter;
 import org.tudublin.bonsaiapp.api.RetrofitClient;
 import org.tudublin.bonsaiapp.model.Tree;
@@ -48,6 +50,14 @@ public class TreeListActivity extends AppCompatActivity {
         recycler.setHasFixedSize(true);
         recycler.setAdapter(adapter);
 
+        FloatingActionButton fab = findViewById(R.id.fabAdd);
+        fab.setOnClickListener(v ->
+                startActivity(new Intent(TreeListActivity.this, AddEditTreeActivity.class)));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         loadTrees();
     }
 

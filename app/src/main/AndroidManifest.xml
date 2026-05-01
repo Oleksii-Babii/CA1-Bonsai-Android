@@ -28,6 +28,9 @@
         <activity android:name=".TreeDetailActivity" android:exported="false"
             android:label="@string/label_tree_detail"
             android:parentActivityName=".TreeListActivity" />
+        <activity android:name=".AddEditTreeActivity" android:exported="false"
+            android:label="@string/label_add_tree"
+            android:parentActivityName=".TreeListActivity" />
     </application>
 
 </manifest>

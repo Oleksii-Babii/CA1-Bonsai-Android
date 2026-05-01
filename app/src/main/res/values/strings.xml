@@ -16,6 +16,11 @@
     <string name="label_height">Height</string>
     <string name="label_last_watered">Last watered</string>
     <string name="label_notes">Notes</string>
+    <string name="label_nickname">Nickname</string>
+    <string name="label_add_tree">Add tree</string>
+    <string name="btn_save">Save</string>
+    <string name="msg_tree_saved">Tree saved.</string>
+    <string name="error_required_fields">Please fill in nickname, age and height.</string>
     <string name="empty_no_species">No species available.</string>
     <string name="empty_no_trees">No trees yet. Add your first one!</string>
     <string name="error_loading">Failed to load data. Check your connection.</string>
