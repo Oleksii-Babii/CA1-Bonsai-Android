@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -43,7 +42,8 @@ public class MainActivity extends AppCompatActivity {
         Button myCollection  = findViewById(R.id.btnViewTrees);
         browseSpecies.setOnClickListener(v ->
                 startActivity(new Intent(MainActivity.this, SpeciesListActivity.class)));
-        myCollection.setOnClickListener(v -> { /* trees screen lands later */ });
+        myCollection.setOnClickListener(v ->
+                startActivity(new Intent(MainActivity.this, TreeListActivity.class)));
 
         loadFeaturedSpecies();
     }

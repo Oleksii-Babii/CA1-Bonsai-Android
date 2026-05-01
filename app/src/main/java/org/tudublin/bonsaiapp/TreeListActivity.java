@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.tudublin.bonsaiapp.adapter.TreeAdapter;
 import org.tudublin.bonsaiapp.api.RetrofitClient;
 import org.tudublin.bonsaiapp.model.Tree;
 
@@ -24,6 +25,7 @@ public class TreeListActivity extends AppCompatActivity {
 
     private static final String TAG = "BonsaiApp";
 
+    private TreeAdapter adapter;
     private ProgressBar progressBar;
     private TextView emptyView;
 
@@ -35,7 +37,13 @@ public class TreeListActivity extends AppCompatActivity {
         RecyclerView recycler = findViewById(R.id.recyclerTrees);
         progressBar = findViewById(R.id.progressBar);
         emptyView   = findViewById(R.id.emptyView);
+
+        adapter = new TreeAdapter(t -> {
+            // detail screen lands later
+        });
         recycler.setLayoutManager(new LinearLayoutManager(this));
+        recycler.setHasFixedSize(true);
+        recycler.setAdapter(adapter);
 
         loadTrees();
     }
@@ -49,6 +57,7 @@ public class TreeListActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Tree> list = response.body();
                     emptyView.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
+                    adapter.updateData(list);
                     Log.d(TAG, "Loaded " + list.size() + " trees");
                 }
             }
