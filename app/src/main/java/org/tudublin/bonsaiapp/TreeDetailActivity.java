@@ -23,7 +23,7 @@ public class TreeDetailActivity extends AppCompatActivity {
     public static final String EXTRA_TREE_ID = "org.tudublin.bonsaiapp.TREE_ID";
     private static final String TAG = "BonsaiApp";
 
-    private TextView textNickname, textSpecies, textAge, textHeight;
+    private TextView textNickname, textSpecies, textAge, textHeight, textLastWatered, textNotes;
     private ImageView imageTree;
     private ProgressBar progressBar;
 
@@ -32,16 +32,23 @@ public class TreeDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tree_detail);
 
-        textNickname = findViewById(R.id.textNickname);
-        textSpecies  = findViewById(R.id.textSpecies);
-        textAge      = findViewById(R.id.textAge);
-        textHeight   = findViewById(R.id.textHeight);
-        imageTree    = findViewById(R.id.imageTree);
-        progressBar  = findViewById(R.id.progressBar);
+        textNickname    = findViewById(R.id.textNickname);
+        textSpecies     = findViewById(R.id.textSpecies);
+        textAge         = findViewById(R.id.textAge);
+        textHeight      = findViewById(R.id.textHeight);
+        textLastWatered = findViewById(R.id.textLastWatered);
+        textNotes       = findViewById(R.id.textNotes);
+        imageTree       = findViewById(R.id.imageTree);
+        progressBar     = findViewById(R.id.progressBar);
 
         int id = getIntent().getIntExtra(EXTRA_TREE_ID, -1);
         if (id == -1) { finish(); return; }
         loadTree(id);
+    }
+
+    private static String formatDate(String iso) {
+        if (iso == null || iso.length() < 10) return "";
+        return iso.substring(0, 10);
     }
 
     private void loadTree(int id) {
@@ -56,6 +63,8 @@ public class TreeDetailActivity extends AppCompatActivity {
                     if (t.getSpecies() != null) textSpecies.setText(t.getSpecies().getName());
                     textAge.setText(getString(R.string.label_age) + ": " + t.getAge());
                     textHeight.setText(getString(R.string.label_height) + ": " + t.getHeight());
+                    textLastWatered.setText(getString(R.string.label_last_watered) + ": " + formatDate(t.getLastWateredDate()));
+                    textNotes.setText(t.getNotes());
                     ImageUtils.loadTreeImage(imageTree, t);
                     Log.d(TAG, "Loaded tree: " + t.getNickname());
                 }
