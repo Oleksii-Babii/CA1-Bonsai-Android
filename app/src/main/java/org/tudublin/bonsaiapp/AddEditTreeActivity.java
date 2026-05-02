@@ -25,11 +25,13 @@ import retrofit2.Response;
 
 public class AddEditTreeActivity extends AppCompatActivity {
 
+    public static final String EXTRA_TREE_ID = "org.tudublin.bonsaiapp.EDIT_TREE_ID";
     private static final String TAG = "BonsaiApp";
 
     private TextInputEditText editNickname, editAge, editHeight, editNotes;
     private Spinner spinnerSpecies;
     private final List<Species> speciesList = new ArrayList<>();
+    private int editingTreeId = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +46,12 @@ public class AddEditTreeActivity extends AppCompatActivity {
 
         ((MaterialButton) findViewById(R.id.btnSave)).setOnClickListener(v -> saveTree());
 
+        editingTreeId = getIntent().getIntExtra(EXTRA_TREE_ID, -1);
         loadSpecies();
+        if (editingTreeId != -1) {
+            setTitle(R.string.label_edit_tree);
+            loadExistingTree(editingTreeId);
+        }
     }
 
     private void loadSpecies() {
@@ -68,6 +75,32 @@ public class AddEditTreeActivity extends AppCompatActivity {
         });
     }
 
+    private void loadExistingTree(int id) {
+        RetrofitClient.getService().getTree(id).enqueue(new Callback<Tree>() {
+            @Override
+            public void onResponse(Call<Tree> call, Response<Tree> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Tree t = response.body();
+                    editNickname.setText(t.getNickname());
+                    editAge.setText(String.valueOf(t.getAge()));
+                    editHeight.setText(String.valueOf(t.getHeight()));
+                    editNotes.setText(t.getNotes());
+                    for (int i = 0; i < speciesList.size(); i++) {
+                        if (speciesList.get(i).getId() == t.getSpeciesId()) {
+                            spinnerSpecies.setSelection(i);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Tree> call, Throwable t) {
+                Log.e(TAG, "Tree load failed: " + t.getMessage());
+            }
+        });
+    }
+
     private void saveTree() {
         String nickname = editNickname.getText() == null ? "" : editNickname.getText().toString().trim();
         String ageStr   = editAge.getText() == null ? "" : editAge.getText().toString().trim();
@@ -79,6 +112,7 @@ public class AddEditTreeActivity extends AppCompatActivity {
         }
 
         Tree t = new Tree();
+        if (editingTreeId != -1) t.setId(editingTreeId);
         t.setNickname(nickname);
         t.setAge(Integer.parseInt(ageStr));
         t.setHeight(Double.parseDouble(hStr));
@@ -87,7 +121,11 @@ public class AddEditTreeActivity extends AppCompatActivity {
         int pos = spinnerSpecies.getSelectedItemPosition();
         if (pos >= 0 && pos < speciesList.size()) t.setSpeciesId(speciesList.get(pos).getId());
 
-        RetrofitClient.getService().createTree(t).enqueue(new Callback<Tree>() {
+        Call<Tree> call = (editingTreeId == -1)
+                ? RetrofitClient.getService().createTree(t)
+                : RetrofitClient.getService().updateTree(editingTreeId, t);
+
+        call.enqueue(new Callback<Tree>() {
             @Override
             public void onResponse(Call<Tree> call, Response<Tree> response) {
                 if (response.isSuccessful()) {

@@ -7,8 +7,10 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public interface BonsaiApiService {
@@ -27,4 +29,10 @@ public interface BonsaiApiService {
 
     @POST("/api/trees")
     Call<Tree> createTree(@Body Tree tree);
+
+    @PUT("/api/trees/{id}")
+    Call<Tree> updateTree(@Path("id") int id, @Body Tree tree);
+
+    @DELETE("/api/trees/{id}")
+    Call<Void> deleteTree(@Path("id") int id);
 }

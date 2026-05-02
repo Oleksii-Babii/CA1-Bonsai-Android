@@ -1,13 +1,17 @@
 package org.tudublin.bonsaiapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.tudublin.bonsaiapp.api.RetrofitClient;
@@ -26,6 +30,7 @@ public class TreeDetailActivity extends AppCompatActivity {
     private TextView textNickname, textSpecies, textAge, textHeight, textLastWatered, textNotes;
     private ImageView imageTree;
     private ProgressBar progressBar;
+    private int treeId = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,9 +46,64 @@ public class TreeDetailActivity extends AppCompatActivity {
         imageTree       = findViewById(R.id.imageTree);
         progressBar     = findViewById(R.id.progressBar);
 
-        int id = getIntent().getIntExtra(EXTRA_TREE_ID, -1);
-        if (id == -1) { finish(); return; }
-        loadTree(id);
+        treeId = getIntent().getIntExtra(EXTRA_TREE_ID, -1);
+        if (treeId == -1) { finish(); return; }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadTree(treeId);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_tree_detail, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_edit) {
+            Intent i = new Intent(this, AddEditTreeActivity.class);
+            i.putExtra(AddEditTreeActivity.EXTRA_TREE_ID, treeId);
+            startActivity(i);
+            return true;
+        } else if (id == R.id.action_delete) {
+            confirmDelete();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void confirmDelete() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.dialog_delete_title)
+                .setMessage(R.string.dialog_delete_message)
+                .setPositiveButton(R.string.btn_delete, (d, w) -> deleteTree())
+                .setNegativeButton(R.string.btn_cancel, null)
+                .show();
+    }
+
+    private void deleteTree() {
+        RetrofitClient.getService().deleteTree(treeId).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(TreeDetailActivity.this, R.string.msg_tree_deleted, Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    Toast.makeText(TreeDetailActivity.this, R.string.error_loading, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(TreeDetailActivity.this, R.string.error_loading, Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Delete failed: " + t.getMessage());
+            }
+        });
     }
 
     private static String formatDate(String iso) {
