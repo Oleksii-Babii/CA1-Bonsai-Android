@@ -1,12 +1,19 @@
 package org.tudublin.bonsaiapp;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
@@ -16,6 +23,9 @@ import org.tudublin.bonsaiapp.api.RetrofitClient;
 import org.tudublin.bonsaiapp.model.Species;
 import org.tudublin.bonsaiapp.model.Tree;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,11 +37,18 @@ public class AddEditTreeActivity extends AppCompatActivity {
 
     public static final String EXTRA_TREE_ID = "org.tudublin.bonsaiapp.EDIT_TREE_ID";
     private static final String TAG = "BonsaiApp";
+    private static final int MAX_IMAGE_PX = 800;
+    private static final int JPEG_QUALITY = 80;
 
     private TextInputEditText editNickname, editAge, editHeight, editNotes;
     private Spinner spinnerSpecies;
+    private ImageView imagePreview;
     private final List<Species> speciesList = new ArrayList<>();
     private int editingTreeId = -1;
+    private String pendingImageBase64;
+
+    private final ActivityResultLauncher<String> pickImage =
+            registerForActivityResult(new ActivityResultContracts.GetContent(), this::onImagePicked);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,8 +60,10 @@ public class AddEditTreeActivity extends AppCompatActivity {
         editHeight     = findViewById(R.id.editHeight);
         editNotes      = findViewById(R.id.editNotes);
         spinnerSpecies = findViewById(R.id.spinnerSpecies);
+        imagePreview   = findViewById(R.id.imagePreview);
 
         ((MaterialButton) findViewById(R.id.btnSave)).setOnClickListener(v -> saveTree());
+        ((MaterialButton) findViewById(R.id.btnPickPhoto)).setOnClickListener(v -> pickImage.launch("image/*"));
 
         editingTreeId = getIntent().getIntExtra(EXTRA_TREE_ID, -1);
         loadSpecies();
@@ -52,6 +71,30 @@ public class AddEditTreeActivity extends AppCompatActivity {
             setTitle(R.string.label_edit_tree);
             loadExistingTree(editingTreeId);
         }
+    }
+
+    private void onImagePicked(Uri uri) {
+        if (uri == null) return;
+        try (InputStream is = getContentResolver().openInputStream(uri)) {
+            Bitmap bmp = BitmapFactory.decodeStream(is);
+            if (bmp == null) return;
+            pendingImageBase64 = compressPhoto(bmp);
+            imagePreview.setImageBitmap(bmp);
+        } catch (Exception e) {
+            Log.e(TAG, "Pick image failed: " + e.getMessage());
+        }
+    }
+
+    private static String compressPhoto(Bitmap source) {
+        int w = source.getWidth();
+        int h = source.getHeight();
+        float scale = Math.min((float) MAX_IMAGE_PX / Math.max(w, h), 1f);
+        if (scale < 1f) {
+            source = Bitmap.createScaledBitmap(source, Math.round(w * scale), Math.round(h * scale), true);
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        source.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, out);
+        return Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP);
     }
 
     private void loadSpecies() {
@@ -117,6 +160,8 @@ public class AddEditTreeActivity extends AppCompatActivity {
         t.setAge(Integer.parseInt(ageStr));
         t.setHeight(Double.parseDouble(hStr));
         if (editNotes.getText() != null) t.setNotes(editNotes.getText().toString().trim());
+        t.setLastWateredDate(LocalDate.now() + "T00:00:00");
+        if (pendingImageBase64 != null) t.setImageData(pendingImageBase64);
 
         int pos = spinnerSpecies.getSelectedItemPosition();
         if (pos >= 0 && pos < speciesList.size()) t.setSpeciesId(speciesList.get(pos).getId());

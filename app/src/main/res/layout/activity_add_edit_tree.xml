@@ -10,6 +10,28 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginBottom="16dp">
+
+            <ImageView
+                android:id="@+id/imagePreview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_tree_placeholder"
+                android:contentDescription="@string/cd_image" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPickPhoto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="8dp"
+                android:text="@string/btn_pick_photo" />
+        </FrameLayout>
+
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
