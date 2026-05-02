@@ -15,6 +15,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import org.tudublin.bonsaiapp.R;
 import org.tudublin.bonsaiapp.model.Species;
+import org.tudublin.bonsaiapp.util.DifficultyUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +45,7 @@ public class SpeciesAdapter extends RecyclerView.Adapter<SpeciesAdapter.ViewHold
         Species s = items.get(position);
         h.textName.setText(s.getName());
         h.textOrigin.setText(s.getOriginCountry());
-        h.textDifficulty.setText(s.getDifficultyLevel());
+        DifficultyUtils.applyTo(h.textDifficulty, s.getDifficultyLevel());
         if (!TextUtils.isEmpty(s.getImageUrl())) {
             Glide.with(h.imageSpecies.getContext())
                     .load(s.getImageUrl())

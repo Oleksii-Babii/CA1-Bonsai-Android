@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide;
 
 import org.tudublin.bonsaiapp.api.RetrofitClient;
 import org.tudublin.bonsaiapp.model.Species;
+import org.tudublin.bonsaiapp.util.DifficultyUtils;
 
 import java.util.List;
 
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
                     Species s = response.body().get(0);
                     textFeaturedName.setText(s.getName());
                     textFeaturedOrigin.setText(s.getOriginCountry());
-                    textFeaturedDifficulty.setText(s.getDifficultyLevel());
+                    DifficultyUtils.applyTo(textFeaturedDifficulty, s.getDifficultyLevel());
                     if (!TextUtils.isEmpty(s.getImageUrl())) {
                         Glide.with(MainActivity.this).load(s.getImageUrl()).into(imageFeatured);
                     }

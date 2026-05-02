@@ -14,9 +14,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
-import org.tudublin.bonsaiapp.api.BonsaiApiService;
 import org.tudublin.bonsaiapp.api.RetrofitClient;
 import org.tudublin.bonsaiapp.model.Species;
+import org.tudublin.bonsaiapp.util.DifficultyUtils;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -50,8 +50,7 @@ public class SpeciesDetailActivity extends AppCompatActivity {
 
     private void loadSpeciesDetail(int id) {
         progressBar.setVisibility(View.VISIBLE);
-        BonsaiApiService service = RetrofitClient.getService();
-        service.getSpecies(id).enqueue(new Callback<Species>() {
+        RetrofitClient.getService().getSpecies(id).enqueue(new Callback<Species>() {
             @Override
             public void onResponse(Call<Species> call, Response<Species> response) {
                 progressBar.setVisibility(View.GONE);
@@ -59,11 +58,10 @@ public class SpeciesDetailActivity extends AppCompatActivity {
                     Species s = response.body();
                     textName.setText(s.getName());
                     textOrigin.setText(getString(R.string.label_origin) + " " + s.getOriginCountry());
-                    textDifficulty.setText(s.getDifficultyLevel());
+                    DifficultyUtils.applyTo(textDifficulty, s.getDifficultyLevel());
                     textDescription.setText(s.getDescription());
                     if (!TextUtils.isEmpty(s.getImageUrl())) {
-                        Glide.with(SpeciesDetailActivity.this)
-                                .load(s.getImageUrl())
+                        Glide.with(SpeciesDetailActivity.this).load(s.getImageUrl())
                                 .placeholder(R.drawable.ic_tree_placeholder)
                                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                                 .into(imageSpecies);
