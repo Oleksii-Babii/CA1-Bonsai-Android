@@ -12,6 +12,7 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface BonsaiApiService {
 
@@ -26,6 +27,9 @@ public interface BonsaiApiService {
 
     @GET("/api/trees/{id}")
     Call<Tree> getTree(@Path("id") int id);
+
+    @GET("/api/trees/search")
+    Call<List<Tree>> searchTrees(@Query("name") String name);
 
     @POST("/api/trees")
     Call<Tree> createTree(@Body Tree tree);

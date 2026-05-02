@@ -19,6 +19,7 @@
     <string name="label_nickname">Nickname</string>
     <string name="label_add_tree">Add tree</string>
     <string name="label_edit_tree">Edit tree</string>
+    <string name="hint_search_trees">Search by nickname</string>
     <string name="btn_save">Save</string>
     <string name="btn_edit">Edit</string>
     <string name="btn_delete">Delete</string>
