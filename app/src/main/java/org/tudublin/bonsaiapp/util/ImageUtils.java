@@ -1,7 +1,7 @@
 package org.tudublin.bonsaiapp.util;
 
-import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -12,49 +12,39 @@ import org.tudublin.bonsaiapp.model.Tree;
 
 public final class ImageUtils {
 
+    private static final String TAG = "ImageUtils";
+
     private ImageUtils() {}
 
-    /**
-     * Loads the best-available image for a tree. The fallback chain is:
-     *   imageData (base64) -> imageUrl -> species.imageUrl -> placeholder.
-     */
-    public static void loadTreeImage(ImageView target, Tree tree) {
-        if (tree == null) {
-            target.setImageResource(R.drawable.ic_tree_placeholder);
-            return;
-        }
-
-        if (!TextUtils.isEmpty(tree.getImageData())) {
+    public static void loadTreeImage(ImageView view, Tree tree) {
+        if (tree.getImageData() != null && !tree.getImageData().isEmpty()) {
             try {
                 byte[] bytes = Base64.decode(tree.getImageData(), Base64.DEFAULT);
-                Glide.with(target.getContext())
-                        .asBitmap()
+                Glide.with(view.getContext())
                         .load(bytes)
-                        .placeholder(R.drawable.ic_tree_placeholder)
                         .diskCacheStrategy(DiskCacheStrategy.NONE)
-                        .into(target);
-                return;
-            } catch (IllegalArgumentException ignored) { /* fallthrough */ }
+                        .placeholder(R.drawable.ic_tree_placeholder)
+                        .centerCrop()
+                        .into(view);
+            } catch (IllegalArgumentException e) {
+                Log.e(TAG, "Invalid base64 image for tree " + tree.getId(), e);
+                view.setImageResource(R.drawable.ic_tree_placeholder);
+            }
+        } else {
+            String url = tree.getImageUrl();
+            if ((url == null || url.isEmpty()) && tree.getSpecies() != null) {
+                url = tree.getSpecies().getImageUrl();
+            }
+            if (url != null && !url.isEmpty()) {
+                Glide.with(view.getContext())
+                        .load(url)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .placeholder(R.drawable.ic_tree_placeholder)
+                        .centerCrop()
+                        .into(view);
+            } else {
+                view.setImageResource(R.drawable.ic_tree_placeholder);
+            }
         }
-
-        if (!TextUtils.isEmpty(tree.getImageUrl())) {
-            Glide.with(target.getContext())
-                    .load(tree.getImageUrl())
-                    .placeholder(R.drawable.ic_tree_placeholder)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(target);
-            return;
-        }
-
-        if (tree.getSpecies() != null && !TextUtils.isEmpty(tree.getSpecies().getImageUrl())) {
-            Glide.with(target.getContext())
-                    .load(tree.getSpecies().getImageUrl())
-                    .placeholder(R.drawable.ic_tree_placeholder)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(target);
-            return;
-        }
-
-        target.setImageResource(R.drawable.ic_tree_placeholder);
     }
 }
