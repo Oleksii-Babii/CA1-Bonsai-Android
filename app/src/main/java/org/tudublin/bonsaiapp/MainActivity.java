@@ -2,17 +2,17 @@ package org.tudublin.bonsaiapp;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Button;
-import android.widget.ImageView;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 
+import org.tudublin.bonsaiapp.api.BonsaiApiService;
 import org.tudublin.bonsaiapp.api.RetrofitClient;
+import org.tudublin.bonsaiapp.databinding.ActivityMainBinding;
 import org.tudublin.bonsaiapp.model.Species;
 import org.tudublin.bonsaiapp.util.DifficultyUtils;
 
@@ -25,49 +25,57 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "BonsaiApp";
-
-    private ImageView imageFeatured;
-    private TextView textFeaturedName, textFeaturedOrigin, textFeaturedDifficulty;
+    private ActivityMainBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        imageFeatured          = findViewById(R.id.imageFeatured);
-        textFeaturedName       = findViewById(R.id.textFeaturedName);
-        textFeaturedOrigin     = findViewById(R.id.textFeaturedOrigin);
-        textFeaturedDifficulty = findViewById(R.id.textFeaturedDifficulty);
+        setSupportActionBar(binding.toolbar);
 
-        Button browseSpecies = findViewById(R.id.btnViewSpecies);
-        Button myCollection  = findViewById(R.id.btnViewTrees);
-        browseSpecies.setOnClickListener(v ->
-                startActivity(new Intent(MainActivity.this, SpeciesListActivity.class)));
-        myCollection.setOnClickListener(v ->
-                startActivity(new Intent(MainActivity.this, TreeListActivity.class)));
+        binding.btnViewSpecies.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, SpeciesListActivity.class);
+            startActivity(intent);
+        });
+
+        binding.btnViewTrees.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, TreeListActivity.class);
+            startActivity(intent);
+        });
 
         loadFeaturedSpecies();
     }
 
     private void loadFeaturedSpecies() {
-        RetrofitClient.getService().getAllSpecies().enqueue(new Callback<List<Species>>() {
+        BonsaiApiService service = RetrofitClient.getService();
+        service.getAllSpecies().enqueue(new Callback<List<Species>>() {
             @Override
             public void onResponse(Call<List<Species>> call, Response<List<Species>> response) {
                 if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
-                    Species s = response.body().get(0);
-                    textFeaturedName.setText(s.getName());
-                    textFeaturedOrigin.setText(s.getOriginCountry());
-                    DifficultyUtils.applyTo(textFeaturedDifficulty, s.getDifficultyLevel());
-                    if (!TextUtils.isEmpty(s.getImageUrl())) {
-                        Glide.with(MainActivity.this).load(s.getImageUrl()).into(imageFeatured);
+                    Species featured = response.body().get(0);
+                    binding.textFeaturedName.setText(featured.getName());
+                    binding.textFeaturedOrigin.setText(featured.getOriginCountry());
+                    binding.textFeaturedDifficulty.setText(featured.getDifficultyLevel());
+                    DifficultyUtils.applyTo(binding.textFeaturedDifficulty, featured.getDifficultyLevel());
+                    if (featured.getImageUrl() != null && !featured.getImageUrl().isEmpty()) {
+                        Glide.with(MainActivity.this)
+                                .load(featured.getImageUrl())
+                                .placeholder(R.drawable.ic_tree_placeholder)
+                                .centerCrop()
+                                .into(binding.imageHome);
                     }
+                    Log.d(TAG, "Loaded featured species: " + featured.getName());
                 }
             }
 
             @Override
             public void onFailure(Call<List<Species>> call, Throwable t) {
-                Log.e(TAG, "Featured species failed: " + t.getMessage());
+                binding.textFeaturedName.setText(R.string.error_loading);
+                Log.e(TAG, "Failed to load featured species: " + t.getMessage());
             }
         });
     }
+
 }
