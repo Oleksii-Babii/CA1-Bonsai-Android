@@ -6,6 +6,7 @@ import org.tudublin.bonsaiapp.model.Tree;
 import java.util.List;
 
 import okhttp3.MultipartBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -38,12 +39,12 @@ public interface BonsaiApiService {
     Call<Tree> createTree(@Body Tree tree);
 
     @PUT("/api/trees/{id}")
-    Call<Tree> updateTree(@Path("id") int id, @Body Tree tree);
+    Call<Void> updateTree(@Path("id") int id, @Body Tree tree);
 
     @DELETE("/api/trees/{id}")
     Call<Void> deleteTree(@Path("id") int id);
 
     @Multipart
     @POST("/api/trees/{id}/image")
-    Call<Tree> uploadTreeImage(@Path("id") int id, @Part MultipartBody.Part image);
+    Call<ResponseBody> uploadTreeImage(@Path("id") int id, @Part MultipartBody.Part image);
 }
