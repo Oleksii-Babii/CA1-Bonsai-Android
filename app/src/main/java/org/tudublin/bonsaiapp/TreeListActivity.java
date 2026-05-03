@@ -5,25 +5,23 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.textfield.TextInputEditText;
 
 import org.tudublin.bonsaiapp.adapter.TreeAdapter;
+import org.tudublin.bonsaiapp.api.BonsaiApiService;
 import org.tudublin.bonsaiapp.api.RetrofitClient;
+import org.tudublin.bonsaiapp.databinding.ActivityTreeListBinding;
 import org.tudublin.bonsaiapp.model.Tree;
 
+import java.io.IOException;
 import java.util.List;
 
 import retrofit2.Call;
@@ -33,82 +31,137 @@ import retrofit2.Response;
 public class TreeListActivity extends AppCompatActivity {
 
     private static final String TAG = "BonsaiApp";
-    private static final long SEARCH_DEBOUNCE_MS = 300L;
+    private static final long SEARCH_DEBOUNCE_MS = 300;
 
-    private TreeAdapter adapter;
-    private ProgressBar progressBar;
-    private TextView emptyView;
-    private TextInputEditText editSearch;
-    private final Handler debounce = new Handler(Looper.getMainLooper());
-    private Runnable pending;
+    private ActivityTreeListBinding binding;
+    private TreeAdapter treeAdapter;
+    private final Handler searchHandler = new Handler(Looper.getMainLooper());
+    private Runnable searchRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_tree_list);
+        binding = ActivityTreeListBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        RecyclerView recycler = findViewById(R.id.recyclerTrees);
-        progressBar = findViewById(R.id.progressBar);
-        emptyView   = findViewById(R.id.emptyView);
-        editSearch  = findViewById(R.id.editSearch);
+        setSupportActionBar(binding.toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        binding.toolbar.setNavigationOnClickListener(v -> finish());
 
-        adapter = new TreeAdapter(t -> {
-            Intent i = new Intent(TreeListActivity.this, TreeDetailActivity.class);
-            i.putExtra(TreeDetailActivity.EXTRA_TREE_ID, t.getId());
-            startActivity(i);
+        treeAdapter = new TreeAdapter(tree -> {
+            Intent intent = new Intent(TreeListActivity.this, TreeDetailActivity.class);
+            intent.putExtra(TreeDetailActivity.EXTRA_TREE_ID, tree.getId());
+            startActivity(intent);
         });
-        recycler.setLayoutManager(new LinearLayoutManager(this));
-        recycler.setHasFixedSize(true);
-        recycler.setAdapter(adapter);
 
-        FloatingActionButton fab = findViewById(R.id.fabAdd);
-        fab.setOnClickListener(v ->
-                startActivity(new Intent(TreeListActivity.this, AddEditTreeActivity.class)));
+        binding.recyclerTrees.setLayoutManager(new LinearLayoutManager(this));
+        binding.recyclerTrees.setHasFixedSize(true);
+        binding.recyclerTrees.setAdapter(treeAdapter);
 
-        editSearch.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (pending != null) debounce.removeCallbacks(pending);
-                final String q = s == null ? "" : s.toString().trim();
-                pending = () -> runQuery(q);
-                debounce.postDelayed(pending, SEARCH_DEBOUNCE_MS);
+        binding.editSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (searchRunnable != null) searchHandler.removeCallbacks(searchRunnable);
+                String query = s.toString().trim();
+                searchRunnable = () -> {
+                    if (query.isEmpty()) loadAllTrees();
+                    else searchTrees(query);
+                };
+                searchHandler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_MS);
             }
-            @Override public void afterTextChanged(Editable s) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        FloatingActionButton fab = binding.fabAddTree;
+        fab.setOnClickListener(v -> {
+            Intent intent = new Intent(TreeListActivity.this, AddEditTreeActivity.class);
+            startActivity(intent);
         });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        runQuery(editSearch.getText() == null ? "" : editSearch.getText().toString().trim());
+        loadAllTrees();
     }
 
-    private void runQuery(String query) {
-        progressBar.setVisibility(View.VISIBLE);
-        Callback<List<Tree>> cb = new Callback<List<Tree>>() {
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        searchHandler.removeCallbacksAndMessages(null);
+    }
+
+    private void loadAllTrees() {
+        binding.progressBar.setVisibility(View.VISIBLE);
+        binding.emptyView.setVisibility(View.GONE);
+
+        BonsaiApiService service = RetrofitClient.getService();
+        service.getAllTrees().enqueue(new Callback<List<Tree>>() {
             @Override
             public void onResponse(Call<List<Tree>> call, Response<List<Tree>> response) {
-                progressBar.setVisibility(View.GONE);
+                binding.progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
-                    List<Tree> list = response.body();
-                    emptyView.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
-                    adapter.updateData(list);
-                    Log.d(TAG, "Trees loaded: " + list.size());
+                    displayTrees(response.body());
+                    Log.d(TAG, "Loaded " + response.body().size() + " trees");
+                } else {
+                    String err = "HTTP " + response.code();
+                    try {
+                        if (response.errorBody() != null) err += ": " + response.errorBody().string();
+                    } catch (IOException e) { Log.w(TAG, "Could not read error body", e); }
+                    binding.emptyView.setText(err);
+                    binding.emptyView.setVisibility(View.VISIBLE);
+                    Toast.makeText(TreeListActivity.this, err, Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "Load trees failed: " + err);
                 }
             }
 
             @Override
             public void onFailure(Call<List<Tree>> call, Throwable t) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(TreeListActivity.this, R.string.error_loading, Toast.LENGTH_LONG).show();
-                Log.e(TAG, "Trees load failed: " + t.getMessage());
+                binding.progressBar.setVisibility(View.GONE);
+                String msg = "Network error: " + t.getMessage();
+                binding.emptyView.setText(msg);
+                binding.emptyView.setVisibility(View.VISIBLE);
+                Toast.makeText(TreeListActivity.this, msg, Toast.LENGTH_LONG).show();
+                Log.e(TAG, "Error loading trees: " + t.getMessage(), t);
             }
-        };
+        });
+    }
 
-        if (TextUtils.isEmpty(query)) {
-            RetrofitClient.getService().getAllTrees().enqueue(cb);
-        } else {
-            RetrofitClient.getService().searchTrees(query).enqueue(cb);
-        }
+    private void searchTrees(String query) {
+        BonsaiApiService service = RetrofitClient.getService();
+        service.searchTrees(query).enqueue(new Callback<List<Tree>>() {
+            @Override
+            public void onResponse(Call<List<Tree>> call, Response<List<Tree>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    displayTrees(response.body());
+                } else {
+                    String err = "Search failed: HTTP " + response.code();
+                    binding.emptyView.setText(err);
+                    binding.emptyView.setVisibility(View.VISIBLE);
+                    Log.e(TAG, err);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Tree>> call, Throwable t) {
+                String msg = getString(R.string.error_network, t.getMessage());
+                binding.emptyView.setText(msg);
+                binding.emptyView.setVisibility(View.VISIBLE);
+                Toast.makeText(TreeListActivity.this, msg, Toast.LENGTH_LONG).show();
+                Log.e(TAG, "Search error: " + t.getMessage());
+            }
+        });
+    }
+
+    private void displayTrees(List<Tree> trees) {
+        binding.emptyView.setVisibility(trees.isEmpty() ? View.VISIBLE : View.GONE);
+        treeAdapter.updateData(trees);
     }
 }

@@ -4,17 +4,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import org.tudublin.bonsaiapp.adapter.SpeciesAdapter;
 import org.tudublin.bonsaiapp.api.BonsaiApiService;
 import org.tudublin.bonsaiapp.api.RetrofitClient;
+import org.tudublin.bonsaiapp.databinding.ActivitySpeciesListBinding;
 import org.tudublin.bonsaiapp.model.Species;
 
 import java.util.List;
@@ -26,51 +24,54 @@ import retrofit2.Response;
 public class SpeciesListActivity extends AppCompatActivity {
 
     private static final String TAG = "BonsaiApp";
-
-    private SpeciesAdapter adapter;
-    private ProgressBar progressBar;
-    private TextView emptyView;
+    private ActivitySpeciesListBinding binding;
+    private SpeciesAdapter speciesAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_species_list);
+        binding = ActivitySpeciesListBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        RecyclerView recycler = findViewById(R.id.recyclerSpecies);
-        progressBar = findViewById(R.id.progressBar);
-        emptyView   = findViewById(R.id.emptyView);
+        setSupportActionBar(binding.toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        binding.toolbar.setNavigationOnClickListener(v -> finish());
 
-        adapter = new SpeciesAdapter(species -> {
+        speciesAdapter = new SpeciesAdapter(species -> {
             Intent intent = new Intent(SpeciesListActivity.this, SpeciesDetailActivity.class);
             intent.putExtra(SpeciesDetailActivity.EXTRA_SPECIES_ID, species.getId());
             startActivity(intent);
         });
-        recycler.setLayoutManager(new LinearLayoutManager(this));
-        recycler.setHasFixedSize(true);
-        recycler.setAdapter(adapter);
+
+        binding.recyclerSpecies.setLayoutManager(new LinearLayoutManager(this));
+        binding.recyclerSpecies.setHasFixedSize(true);
+        binding.recyclerSpecies.setAdapter(speciesAdapter);
 
         loadSpecies();
     }
 
     private void loadSpecies() {
-        progressBar.setVisibility(View.VISIBLE);
+        binding.progressBar.setVisibility(View.VISIBLE);
+
         BonsaiApiService service = RetrofitClient.getService();
         service.getAllSpecies().enqueue(new Callback<List<Species>>() {
             @Override
             public void onResponse(Call<List<Species>> call, Response<List<Species>> response) {
-                progressBar.setVisibility(View.GONE);
+                binding.progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
                     List<Species> list = response.body();
-                    emptyView.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
-                    adapter.updateData(list);
+                    binding.emptyView.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
+                    speciesAdapter.updateData(list);
                     Log.d(TAG, "Loaded " + list.size() + " species");
                 }
             }
 
             @Override
             public void onFailure(Call<List<Species>> call, Throwable t) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(SpeciesListActivity.this, R.string.error_loading, Toast.LENGTH_LONG).show();
+                binding.progressBar.setVisibility(View.GONE);
+                Toast.makeText(SpeciesListActivity.this, getString(R.string.error_loading), Toast.LENGTH_LONG).show();
                 Log.e(TAG, "Error loading species: " + t.getMessage());
             }
         });
