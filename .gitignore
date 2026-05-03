@@ -8,7 +8,24 @@
 **/.cxx/
 **/.externalNativeBuild/
 
+# ---------- .NET ----------
+**/bin/
+**/obj/
+**/publish/
+**/publish.zip
+**/*.user
+**/.vs/
+
 # ---------- OS / Editor ----------
 .DS_Store
 Thumbs.db
 *.log
+
+# ---------- Local artefacts ----------
+**/logs/
+**/logs.zip
+**/wwwroot/uploads/
+**/response.json
+**/response.txt
+**/swagger_err.txt
+_history.ps1
