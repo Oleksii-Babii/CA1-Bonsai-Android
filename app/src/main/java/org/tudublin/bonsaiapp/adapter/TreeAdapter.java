@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import org.tudublin.bonsaiapp.R;
@@ -18,49 +19,69 @@ import java.util.List;
 
 public class TreeAdapter extends RecyclerView.Adapter<TreeAdapter.ViewHolder> {
 
-    public interface OnItemClickListener { void onItemClick(Tree tree); }
+    public interface OnItemClickListener {
+        void onItemClick(Tree tree);
+    }
 
     private List<Tree> items = new ArrayList<>();
     private final OnItemClickListener listener;
 
-    public TreeAdapter(OnItemClickListener listener) { this.listener = listener; }
-
-    public void updateData(List<Tree> newItems) {
-        items = new ArrayList<>(newItems);
-        notifyDataSetChanged();
+    public TreeAdapter(OnItemClickListener listener) {
+        this.listener = listener;
     }
 
-    @NonNull @Override
+    public void updateData(List<Tree> newItems) {
+        final List<Tree> oldItems = items;
+        DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override public int getOldListSize() { return oldItems.size(); }
+            @Override public int getNewListSize() { return newItems.size(); }
+            @Override public boolean areItemsTheSame(int oldPos, int newPos) {
+                return oldItems.get(oldPos).getId() == newItems.get(newPos).getId();
+            }
+            @Override public boolean areContentsTheSame(int oldPos, int newPos) {
+                return oldItems.get(oldPos).equals(newItems.get(newPos));
+            }
+        });
+        items = new ArrayList<>(newItems);
+        result.dispatchUpdatesTo(this);
+    }
+
+    @NonNull
+    @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_tree, parent, false);
-        return new ViewHolder(v);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_tree, parent, false);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder h, int position) {
-        Tree t = items.get(position);
-        h.textNickname.setText(t.getNickname());
-        if (t.getSpecies() != null) {
-            h.textSpecies.setText(t.getSpecies().getName());
-        } else {
-            h.textSpecies.setText("");
-        }
-        h.textAge.setText(t.getAge() + " yrs");
-        ImageUtils.loadTreeImage(h.imageTree, t);
-        h.itemView.setOnClickListener(v -> listener.onItemClick(t));
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        Tree tree = items.get(position);
+        holder.textNickname.setText(tree.getNickname() != null ? tree.getNickname() : "");
+        holder.textAge.setText(tree.getAge() + " yrs");
+        holder.textSpecies.setText(tree.getSpecies() != null ? tree.getSpecies().getName() : "");
+
+        ImageUtils.loadTreeImage(holder.imageTree, tree);
+
+        holder.itemView.setOnClickListener(v -> listener.onItemClick(tree));
     }
 
-    @Override public int getItemCount() { return items.size(); }
+    @Override
+    public int getItemCount() {
+        return items.size();
+    }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        final TextView textNickname, textSpecies, textAge;
-        final ImageView imageTree;
-        ViewHolder(View v) {
-            super(v);
-            textNickname = v.findViewById(R.id.textTreeNickname);
-            textSpecies  = v.findViewById(R.id.textTreeSpecies);
-            textAge      = v.findViewById(R.id.textTreeAge);
-            imageTree    = v.findViewById(R.id.imageTree);
+        TextView textNickname;
+        TextView textAge;
+        TextView textSpecies;
+        ImageView imageTree;
+
+        ViewHolder(View view) {
+            super(view);
+            textNickname = view.findViewById(R.id.textTreeNickname);
+            textAge = view.findViewById(R.id.textTreeAge);
+            textSpecies = view.findViewById(R.id.textTreeSpecies);
+            imageTree = view.findViewById(R.id.imageTree);
         }
     }
 }
