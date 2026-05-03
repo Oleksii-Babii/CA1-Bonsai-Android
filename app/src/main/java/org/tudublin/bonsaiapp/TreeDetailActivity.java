@@ -6,15 +6,14 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.tudublin.bonsaiapp.api.BonsaiApiService;
 import org.tudublin.bonsaiapp.api.RetrofitClient;
+import org.tudublin.bonsaiapp.databinding.ActivityTreeDetailBinding;
 import org.tudublin.bonsaiapp.model.Tree;
 import org.tudublin.bonsaiapp.util.ImageUtils;
 
@@ -26,34 +25,36 @@ public class TreeDetailActivity extends AppCompatActivity {
 
     public static final String EXTRA_TREE_ID = "org.tudublin.bonsaiapp.TREE_ID";
     private static final String TAG = "BonsaiApp";
-
-    private TextView textNickname, textSpecies, textAge, textHeight, textLastWatered, textNotes;
-    private ImageView imageTree;
-    private ProgressBar progressBar;
-    private int treeId = -1;
+    private ActivityTreeDetailBinding binding;
+    private int treeId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_tree_detail);
+        binding = ActivityTreeDetailBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        textNickname    = findViewById(R.id.textNickname);
-        textSpecies     = findViewById(R.id.textSpecies);
-        textAge         = findViewById(R.id.textAge);
-        textHeight      = findViewById(R.id.textHeight);
-        textLastWatered = findViewById(R.id.textLastWatered);
-        textNotes       = findViewById(R.id.textNotes);
-        imageTree       = findViewById(R.id.imageTree);
-        progressBar     = findViewById(R.id.progressBar);
+        setSupportActionBar(binding.toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        binding.toolbar.setNavigationOnClickListener(v -> finish());
 
         treeId = getIntent().getIntExtra(EXTRA_TREE_ID, -1);
-        if (treeId == -1) { finish(); return; }
+        if (treeId == -1) {
+            finish();
+            return;
+        }
+
+        loadTreeDetail(treeId);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        loadTree(treeId);
+        if (treeId != -1) {
+            loadTreeDetail(treeId);
+        }
     }
 
     @Override
@@ -64,78 +65,82 @@ public class TreeDetailActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_edit) {
-            Intent i = new Intent(this, AddEditTreeActivity.class);
-            i.putExtra(AddEditTreeActivity.EXTRA_TREE_ID, treeId);
-            startActivity(i);
+        if (item.getItemId() == R.id.action_edit) {
+            Intent intent = new Intent(this, AddEditTreeActivity.class);
+            intent.putExtra(AddEditTreeActivity.EXTRA_TREE_ID, treeId);
+            startActivity(intent);
             return true;
-        } else if (id == R.id.action_delete) {
+        } else if (item.getItemId() == R.id.action_delete) {
             confirmDelete();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void confirmDelete() {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.dialog_delete_title)
-                .setMessage(R.string.dialog_delete_message)
-                .setPositiveButton(R.string.btn_delete, (d, w) -> deleteTree())
-                .setNegativeButton(R.string.btn_cancel, null)
-                .show();
-    }
+    private void loadTreeDetail(int id) {
+        binding.progressBar.setVisibility(View.VISIBLE);
 
-    private void deleteTree() {
-        RetrofitClient.getService().deleteTree(treeId).enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful()) {
-                    Toast.makeText(TreeDetailActivity.this, R.string.msg_tree_deleted, Toast.LENGTH_SHORT).show();
-                    finish();
-                } else {
-                    Toast.makeText(TreeDetailActivity.this, R.string.error_loading, Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                Toast.makeText(TreeDetailActivity.this, R.string.error_loading, Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "Delete failed: " + t.getMessage());
-            }
-        });
-    }
-
-    private static String formatDate(String iso) {
-        if (iso == null || iso.length() < 10) return "";
-        return iso.substring(0, 10);
-    }
-
-    private void loadTree(int id) {
-        progressBar.setVisibility(View.VISIBLE);
-        RetrofitClient.getService().getTree(id).enqueue(new Callback<Tree>() {
+        BonsaiApiService service = RetrofitClient.getService();
+        service.getTree(id).enqueue(new Callback<Tree>() {
             @Override
             public void onResponse(Call<Tree> call, Response<Tree> response) {
-                progressBar.setVisibility(View.GONE);
+                binding.progressBar.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
-                    Tree t = response.body();
-                    textNickname.setText(t.getNickname());
-                    if (t.getSpecies() != null) textSpecies.setText(t.getSpecies().getName());
-                    textAge.setText(getString(R.string.label_age) + ": " + t.getAge());
-                    textHeight.setText(getString(R.string.label_height) + ": " + t.getHeight());
-                    textLastWatered.setText(getString(R.string.label_last_watered) + ": " + formatDate(t.getLastWateredDate()));
-                    textNotes.setText(t.getNotes());
-                    ImageUtils.loadTreeImage(imageTree, t);
-                    Log.d(TAG, "Loaded tree: " + t.getNickname());
+                    Tree tree = response.body();
+                    binding.textNickname.setText(tree.getNickname());
+                    binding.textAge.setText(getString(R.string.label_age) + " " + tree.getAge());
+                    binding.textHeight.setText(getString(R.string.label_height) + " " + tree.getHeight() + " cm");
+                    binding.textLastWatered.setText(getString(R.string.label_last_watered) + " " + formatDate(tree.getLastWateredDate()));
+                    binding.textNotes.setText(tree.getNotes() != null ? tree.getNotes() : "");
+                    if (tree.getSpecies() != null) {
+                        binding.textSpecies.setText(getString(R.string.label_species) + " " + tree.getSpecies().getName());
+                    }
+
+                    ImageUtils.loadTreeImage(binding.imageTree, tree);
+
+                    Log.d(TAG, "Loaded tree: " + tree.getNickname());
                 }
             }
 
             @Override
             public void onFailure(Call<Tree> call, Throwable t) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(TreeDetailActivity.this, R.string.error_loading, Toast.LENGTH_LONG).show();
+                binding.progressBar.setVisibility(View.GONE);
+                Toast.makeText(TreeDetailActivity.this, getString(R.string.error_loading), Toast.LENGTH_LONG).show();
                 Log.e(TAG, "Error loading tree: " + t.getMessage());
             }
         });
+    }
+
+    private void confirmDelete() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.dialog_delete_title)
+                .setMessage(R.string.dialog_delete_message)
+                .setPositiveButton(R.string.btn_delete, (dialog, which) -> deleteTree())
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void deleteTree() {
+        BonsaiApiService service = RetrofitClient.getService();
+        service.deleteTree(treeId).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(TreeDetailActivity.this, R.string.msg_deleted, Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(TreeDetailActivity.this, getString(R.string.error_loading), Toast.LENGTH_LONG).show();
+                Log.e(TAG, "Error deleting tree: " + t.getMessage());
+            }
+        });
+    }
+
+    private String formatDate(String isoDate) {
+        if (isoDate == null || isoDate.isEmpty()) return "";
+        return isoDate.length() >= 10 ? isoDate.substring(0, 10) : isoDate;
     }
 }
