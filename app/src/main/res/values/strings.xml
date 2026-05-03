@@ -1,37 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Bonsai Collection</string>
+
     <string name="btn_browse_species">Browse Species</string>
     <string name="btn_my_collection">My Collection</string>
-    <string name="label_welcome">Welcome back</string>
-    <string name="label_home_subtitle">Cultivate patience. Grow beauty.</string>
+    <string name="btn_add_tree">Add Tree</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_delete">Delete</string>
+    <string name="btn_edit">Edit</string>
+
     <string name="label_featured_species">Featured Species</string>
-    <string name="label_species">Species:</string>
-    <string name="label_species_detail">Species Detail</string>
     <string name="label_origin">Origin:</string>
     <string name="label_difficulty">Difficulty:</string>
-    <string name="label_trees">My Trees</string>
-    <string name="label_tree_detail">Tree Detail</string>
-    <string name="label_age">Age</string>
-    <string name="label_height">Height</string>
-    <string name="label_last_watered">Last watered</string>
+    <string name="label_species">Species:</string>
+    <string name="label_age">Age:</string>
+    <string name="label_height">Height:</string>
+    <string name="label_last_watered">Last watered:</string>
     <string name="label_notes">Notes</string>
     <string name="label_nickname">Nickname</string>
-    <string name="label_add_tree">Add tree</string>
-    <string name="label_edit_tree">Edit tree</string>
-    <string name="hint_search_trees">Search by nickname</string>
-    <string name="btn_save">Save</string>
-    <string name="btn_edit">Edit</string>
-    <string name="btn_delete">Delete</string>
-    <string name="btn_cancel">Cancel</string>
-    <string name="btn_pick_photo">Choose photo</string>
-    <string name="dialog_delete_title">Delete this tree?</string>
-    <string name="dialog_delete_message">This action cannot be undone.</string>
-    <string name="msg_tree_saved">Tree saved.</string>
-    <string name="msg_tree_deleted">Tree deleted.</string>
-    <string name="error_required_fields">Please fill in nickname, age and height.</string>
-    <string name="empty_no_species">No species available.</string>
-    <string name="empty_no_trees">No trees yet. Add your first one!</string>
+    <string name="label_add_tree">Add Tree</string>
+    <string name="label_edit_tree">Edit Tree</string>
+    <string name="label_species_detail">Species Detail</string>
+    <string name="label_trees">My Trees</string>
+    <string name="label_tree_detail">Tree Detail</string>
+
+    <string name="hint_search">Search trees…</string>
+    <string name="hint_nickname">e.g. Old Man</string>
+    <string name="hint_age">Age in years</string>
+    <string name="hint_height">Height in cm</string>
+    <string name="hint_notes">Optional notes…</string>
+
+    <string name="dialog_delete_title">Delete Tree</string>
+    <string name="dialog_delete_message">Are you sure you want to delete this tree?</string>
+
     <string name="error_loading">Failed to load data. Check your connection.</string>
+    <string name="error_fill_required">Please fill in all required fields.</string>
+    <string name="error_select_species">Please select a species.</string>
+    <string name="error_photo_processing">Photo processing error.</string>
+    <string name="error_network">Network error: %s</string>
+    <string name="btn_saving">Saving…</string>
+    <string name="error_invalid_numbers">Age and height must be valid numbers.</string>
+    <string name="label_tree_profile">Tree profile</string>
+    <string name="hint_tree_profile_subtitle">Add the essentials and choose a photo that gives the tree its identity.</string>
+
+    <string name="msg_saved">Saved successfully.</string>
+    <string name="msg_deleted">Tree deleted.</string>
+
     <string name="cd_image">Bonsai image</string>
+    <string name="label_welcome">Welcome back</string>
+    <string name="label_home_subtitle">Cultivate patience. Grow beauty.</string>
+    <string name="empty_no_trees">No trees in your collection yet.\nTap + to add one.</string>
+    <string name="empty_no_species">No species available.</string>
+    <string name="btn_pick_photo">Add Photo</string>
+    <string name="btn_change_photo">Change Photo</string>
+    <string name="label_species_subtitle">Discover all bonsai varieties</string>
+    <string name="label_collection_subtitle">Manage your personal trees</string>
 </resources>
